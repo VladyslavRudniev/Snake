@@ -7,6 +7,8 @@ namespace SnakeLulu
 {
     class LevelBuilder
     {
+        Random random = new Random();
+
         private List<GameEntityUnit<char>> walls;
         public List<GameEntityUnit<char>> Walls { get => walls; set => walls = value; }
 
@@ -15,10 +17,15 @@ namespace SnakeLulu
         
         private SnakeForConsole2D player;
         public SnakeForConsole2D Player { get => player; set => player = value; }
+        
+        private List<GameEntityUnit<char>> apples;
+        public List<GameEntityUnit<char>> Apples { get => apples; set => apples = value; }
 
+        private int widthGameField, heightGameField;
         public LevelBuilder()
         {
             walls = new List<GameEntityUnit<char>>();
+            apples = new List<GameEntityUnit<char>>();
         }
         public void BuildWall(int x, int y, int length, Direction direction)
         {
@@ -40,6 +47,8 @@ namespace SnakeLulu
         }
         public void BuildWallAboutGameField(int width, int height)
         {
+            widthGameField = width;
+            heightGameField = height;
             BuildWall(0, 0, width, Direction.Right);
             BuildWall(width, 0, height, Direction.Back);
             BuildWall(width, height, width, Direction.Left);
@@ -73,8 +82,38 @@ namespace SnakeLulu
             {
                 Console.SetCursorPosition(player.Body[i].X, player.Body[i].Y);
                 Console.Write(player.Body[i].Material);
-                
             }
+        }
+        public void BuildApples(int count)
+        {
+            int x, y;
+            while (apples.Count != count)
+            {
+                x = random.Next(1, widthGameField);
+                y = random.Next(1, heightGameField);
+                if (CheckCoordinate(x, y) == 0)
+                    apples.Add(new GameEntityUnit<char>(x, y, '$', "Apple"));
+            }
+        }
+        public void DrawApples()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            for (int i = 0; i < apples.Count; i++)
+            {
+                Console.SetCursorPosition(apples[i].X, apples[i].Y);
+                Console.Write(apples[i].Material);
+            }
+        }
+
+        private int CheckCoordinate(int x, int y)
+        {
+            int result = 0;
+            Parallel.For(0, player.Body.Length, i => 
+            {
+                if (player.Body[i].X == x && player.Body[i].Y == y)
+                    result = 1;
+            });
+            return result;
         }
     }
 }

@@ -14,6 +14,9 @@ namespace SnakeLulu
 
             levelBuilder.BuildPlayer();
 
+            levelBuilder.BuildApples(2);
+            levelBuilder.DrawApples();
+
             while (true)
             {
                 levelBuilder.DrawPlayer();
