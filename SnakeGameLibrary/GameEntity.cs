@@ -1,6 +1,9 @@
-﻿namespace SnakeGameLibrary
+﻿using System.Collections;
+using System.Collections.Generic;
+
+namespace SnakeGameLibrary
 {
-    public abstract class GameEntity<T>
+    public abstract class GameEntity<T> : IEnumerable
     {
         private GameEntityUnit<T>[] body;
         public GameEntityUnit<T>[] Body { get => body; set => body = value; }
@@ -47,5 +50,10 @@
         public abstract bool Turn(Direction direction);
         public abstract void ChangeLength(int value);
         public abstract void ChangeSpeed(int value);
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return body.GetEnumerator();
+        }
     }
 }

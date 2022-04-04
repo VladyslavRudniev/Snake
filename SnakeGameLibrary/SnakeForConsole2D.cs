@@ -4,6 +4,7 @@ namespace SnakeGameLibrary
 {
     public class SnakeForConsole2D : GameEntity<char>
     {
+        public SnakeForConsole2D(int id, GameEntityUnit<char>[] entityUnits, EntityState state, int speed, Direction direction) : base(id, entityUnits, state, speed, direction) { }
         public override void ChangeLength(int value)
         {
             Body[Body.Length - 1].Material = Body[Body.Length - 2].Material;
