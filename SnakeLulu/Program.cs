@@ -1,4 +1,5 @@
 ﻿using System;
+using SnakeGameLibrary;
 
 namespace SnakeLulu
 {
@@ -6,7 +7,13 @@ namespace SnakeLulu
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            LevelBuilder levelBuilder = new LevelBuilder();
+            levelBuilder.BuildWalls(0, 0, 30, Direction.Right);
+            levelBuilder.BuildWalls(30, 0, 30, Direction.Down);
+            levelBuilder.BuildWalls(30, 30, 30, Direction.Left);
+            levelBuilder.BuildWalls(0, 30, 30, Direction.Up);
+            levelBuilder.DrawWalls();
         }
+
     }
 }

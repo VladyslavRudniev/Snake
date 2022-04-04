@@ -21,7 +21,11 @@ namespace SnakeGameLibrary
 
         public override void ChangePosition()
         {
-            for (int i = this.Body.Length -1; i > 0; i--)
+            ChangingPosition();
+        }
+        protected virtual void ChangingPosition()
+        {
+            for (int i = this.Body.Length - 1; i > 0; i--)
             {
                 Body[i].X = Body[i - 1].X;
                 Body[i].Y = Body[i - 1].Y;
@@ -29,7 +33,7 @@ namespace SnakeGameLibrary
             switch (this.Direction)
             {
                 case Direction.Forward:
-                    --this.Body[0].Y; 
+                    --this.Body[0].Y;
                     break;
                 case Direction.Back:
                     ++this.Body[0].Y;
@@ -47,7 +51,6 @@ namespace SnakeGameLibrary
                     --this.Body[0].Z;
                     break;
             }
-
         }
         public virtual async void ChangePositionAsync()
         {
