@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 
 namespace SnakeGameLibrary
 {
@@ -6,18 +6,26 @@ namespace SnakeGameLibrary
     {
         public override void ChangeLength(int value)
         {
-            if(value > 0)
-            {
-
-            }
-            else
-            {
-
-            }
+            Body[Body.Length - 1].Material = Body[Body.Length - 2].Material;
+            Body[Body.Length - 1].Name = "Body";
+            GameEntityUnit<char>[] temp = new GameEntityUnit<char>[Body.Length +1];
+            Body.CopyTo(temp, 0);
+            Body = temp;
+            Body[Body.Length - 1].Material = ' ';
+            Body[Body.Length - 1].Name = "PhantomTail";
+        }
+        public virtual async void ChangeLengthAsync(int value)
+        {
+            await Task.Factory.StartNew(() => ChangeLength(value));
         }
 
         public override void ChangePosition()
         {
+            for (int i = this.Body.Length -1; i > 0; i--)
+            {
+                Body[i].X = Body[i - 1].X;
+                Body[i].Y = Body[i - 1].Y;
+            }
             switch (this.Direction)
             {
                 case Direction.Forward:
@@ -39,6 +47,11 @@ namespace SnakeGameLibrary
                     --this.Body[0].Z;
                     break;
             }
+
+        }
+        public virtual async void ChangePositionAsync()
+        {
+            await Task.Factory.StartNew(ChangePosition);
         }
 
         public override void ChangeSpeed(int value) => this.Speed += value;
@@ -46,6 +59,10 @@ namespace SnakeGameLibrary
         public override bool Turn(Direction direction)
         {
             return TryChangeDirection(direction);
+        }
+        public virtual async Task TurnAsync(Direction direction)
+        {
+            await Task.Factory.StartNew(() => Turn(direction));
         }
         private bool TryChangeDirection(Direction direction)
         {
