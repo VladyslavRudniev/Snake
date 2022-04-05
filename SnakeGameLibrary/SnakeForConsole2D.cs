@@ -2,18 +2,16 @@
 
 namespace SnakeGameLibrary
 {
-    public class SnakeForConsole2D : GameEntity<char>
+    public class SnakeForConsole2D : GameEntity<char>, ISnakeForConsole2D
     {
         public SnakeForConsole2D(int id, GameEntityUnit<char>[] entityUnits, EntityState state, int speed, Direction direction) : base(id, entityUnits, state, speed, direction) { }
         public override void ChangeLength(int value)
         {
             Body[Body.Length - 1].Material = Body[Body.Length - 2].Material;
-            Body[Body.Length - 1].Name = "Body";
             GameEntityUnit<char>[] temp = new GameEntityUnit<char>[Body.Length +1];
             Body.CopyTo(temp, 0);
             Body = temp;
             Body[Body.Length - 1].Material = ' ';
-            Body[Body.Length - 1].Name = "PhantomTail";
         }
         public virtual async void ChangeLengthAsync(int value)
         {
@@ -64,7 +62,7 @@ namespace SnakeGameLibrary
         {
             return TryChangeDirection(direction);
         }
-        public virtual async Task TurnAsync(Direction direction)
+        public virtual async void TurnAsync(Direction direction)
         {
             await Task.Factory.StartNew(() => Turn(direction));
         }

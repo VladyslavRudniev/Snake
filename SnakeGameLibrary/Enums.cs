@@ -19,4 +19,10 @@
         Up = 4,
         Down = 5,
     }
+    public enum GameStatus : byte
+    {
+        Play = 0,
+        Over = 1,
+        Wait = 2,
+    }
 }

@@ -1,20 +1,21 @@
-﻿using System;
+﻿using SnakeGameLibrary;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SnakeGameLibrary;
 
 namespace SnakeLulu
 {
-    class LevelBuilder
+    class Model
     {
+        #region <-- Fields and properties
         Random random = new Random();
 
         private List<GameEntityUnit<char>> wallsForGameField;
         public List<GameEntityUnit<char>> WallsForGameField { get => wallsForGameField; set => wallsForGameField = value; }
-
+        
         private List<GameEntityUnit<char>> wallsOther;
         public List<GameEntityUnit<char>> WallsOther { get => wallsOther; set => wallsOther = value; }
-
+        
         private int levelScore;
         public int LevelScore { get => levelScore; set => levelScore = value; }
 
@@ -25,12 +26,26 @@ namespace SnakeLulu
         public List<GameEntityUnit<char>> Apples { get => apples; set => apples = value; }
 
         private int widthGameField, heightGameField;
-        public LevelBuilder()
+        #endregion
+
+        #region Singlton <-- Constructor
+        protected Model()
         {
-            wallsForGameField = new List<GameEntityUnit<char>>();
-            wallsOther = new List<GameEntityUnit<char>>();
-            apples = new List<GameEntityUnit<char>>();
+            this.wallsForGameField = new List<GameEntityUnit<char>>();
+            this.wallsOther = new List<GameEntityUnit<char>>();
+            this.apples = new List<GameEntityUnit<char>>();
         }
+        static Model model;
+        public static Model GetInstance()
+        {
+            if (model == null)
+            {
+                return model = new Model();
+            }
+            return model;
+        }
+        #endregion
+
         public void BuildWall(int x, int y, int length, Direction direction)
         {
             switch (direction)
@@ -58,16 +73,6 @@ namespace SnakeLulu
             BuildWall(width, height, width, Direction.Left);
             BuildWall(0, height, height, Direction.Forward);
         }
-        public void DrawWalls()
-        {
-            Console.BackgroundColor = ConsoleColor.White;
-            foreach (var el in wallsForGameField)
-            {
-                Console.SetCursorPosition(el.X, el.Y);
-                Console.Write(' ');
-            }
-            Console.BackgroundColor = ConsoleColor.Black;
-        }
         public void BuildPlayer()
         {
             player = new SnakeForConsole2D(13, new GameEntityUnit<char>[]
@@ -79,15 +84,6 @@ namespace SnakeLulu
                 new GameEntityUnit<char>(24, 10, ' '),
             }, EntityState.Move, 0, Direction.Left);
         }
-        public void DrawPlayer()
-        {
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            for (int i = 0; i < player.Body.Length; i++)
-            {
-                Console.SetCursorPosition(player.Body[i].X, player.Body[i].Y);
-                Console.Write(player.Body[i].Material);
-            }
-        }
         public void BuildApples(int count)
         {
             int x, y;
@@ -97,15 +93,6 @@ namespace SnakeLulu
                 y = random.Next(1, heightGameField);
                 if (!CheckCoordinatePlayer(x, y))
                     apples.Add(new GameEntityUnit<char>(x, y, '$'));
-            }
-        }
-        public void DrawApples()
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            for (int i = 0; i < apples.Count; i++)
-            {
-                Console.SetCursorPosition(apples[i].X, apples[i].Y);
-                Console.Write(apples[i].Material);
             }
         }
 
