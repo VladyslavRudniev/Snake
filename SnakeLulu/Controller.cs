@@ -1,5 +1,6 @@
 ﻿using SnakeGameLibrary;
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,81 +8,118 @@ namespace SnakeLulu
 {
     class Controller
     {
-        static Model model;
-        static View view;
-
-        private static Task playGameTask;
+        private static Model model;
+        private static View view;
         private static GameStatus gameStatus;
-        private static LevelBuilder levelBuilder;
+        private static int levelNumber;
+
         static void Main(string[] args)
         {
             model = Model.GetInstance();
             view = View.GetInstance(model);
+            levelNumber = 1;
 
+            SetOptions();
 
-            StartGame();
+            ShowGameInroAndOpenMenu();     
+        }
 
-            playGameTask = new Task(PlayGame);
-            playGameTask.Start();
-
-            while (gameStatus == GameStatus.Play)
+        static void SetOptions()
+        {
+            Console.OutputEncoding = Encoding.Unicode;
+            Console.CursorVisible = false;
+            Console.WindowWidth = 90;
+            Console.WindowHeight = 30;
+        }
+        static void ShowGameInroAndOpenMenu()
+        {
+            CancellationTokenSource cancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellation.Token;
+            Task task = new Task(view.ShowGameIntro, cancellationToken);
+            task.Start();
+            Console.ReadKey();
+            try
             {
+                if (!task.IsCompleted)
+                    cancellation.Cancel();
+                task.Wait();
+            }
+            catch { }
+
+            view.ShowMenu(MenuItems.StartGame);
+            int index = 0;
+            bool isSelected = false;
+            while (!isSelected)
+            {
+                view.ShowMenu((MenuItems)index);
                 switch (Console.ReadKey().Key)
                 {
                     case ConsoleKey.UpArrow:
-                        levelBuilder.Player.TurnAsync(Direction.Forward);
+                        --index;
+                        if (index == -1)
+                            index = 2;
                         break;
                     case ConsoleKey.DownArrow:
-                        levelBuilder.Player.TurnAsync(Direction.Back);
+                        ++index;
+                        if (index == 3)
+                            index = 0;
                         break;
-                    case ConsoleKey.LeftArrow:
-                        levelBuilder.Player.TurnAsync(Direction.Left);
-                        break;
-                    case ConsoleKey.RightArrow:
-                        levelBuilder.Player.TurnAsync(Direction.Right);
+                    case ConsoleKey.Enter:
+                        isSelected = true;
                         break;
                 }
             }
+            Console.Clear();
+            switch (index)
+            {
+                case 0:
+                    BuildGameModel();
+                    PlayGameAsync();
+                    ControlSnake();
+                    break;
+                case 1:
+
+                    //break;
+                case 2:
+                    Environment.Exit(0);
+                    break;
+            }
         }
-
-        static void StartGame()
+        static void BuildGameModel()
         {
-            levelBuilder = new LevelBuilder();
+            view.ShowLevelInfo(levelNumber);
+            model.BuildWallAboutGameField(40, 20);
+            view.DrawWalls();
 
-            levelBuilder.BuildWallAboutGameField(40, 20);
-            levelBuilder.DrawWalls();
+            model.BuildPlayer();
 
-            levelBuilder.BuildPlayer();
-
-            levelBuilder.BuildApples(2);
-            levelBuilder.DrawApples();
+            model.BuildApples(2);
+            view.DrawApples();
 
             gameStatus = GameStatus.Play;
         }
+        static async void PlayGameAsync()
+        {
+            await Task.Factory.StartNew(PlayGame);
+        }
         static void PlayGame()
         {
-            bool DrawApples = false;
             while (true)
             {
-                if (DrawApples)
+                model.MovePlayer();
+                view.DrawPlayer();
+
+                if (model.CheckCoordinateApplesForPlayer())
                 {
-                    levelBuilder.DrawApples();
-                    DrawApples = false;
+                    view.UpdateLevelInfo(levelNumber);
+                    view.DrawApples();
                 }
-
-                levelBuilder.DrawPlayer();
-                levelBuilder.Player.ChangePositionAsync();
-
-                if (levelBuilder.CheckCoordinateApplesForPlayer())
-                {
-                    DrawApples = true;
-                }
-
-                if (levelBuilder.CheckCoordinateWallsGameField(levelBuilder.Player[0].X, levelBuilder.Player[0].Y))
+                
+                if (model.CheckCoordinateWallsGameField())
                 {
                     break;
                 }
-                Thread.Sleep(500);
+                Thread.Sleep(400);
             }
 
             gameStatus = GameStatus.Over;
@@ -89,6 +127,28 @@ namespace SnakeLulu
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Game over!!!");
             Console.ReadKey();
+        }
+        static void ControlSnake()
+        {
+            while (gameStatus == GameStatus.Play)
+            {
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        model.Player.TurnAsync(Direction.Forward);
+                        break;
+                    case ConsoleKey.DownArrow:
+                        model.Player.TurnAsync(Direction.Back);
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        model.Player.TurnAsync(Direction.Left);
+                        break;
+                    case ConsoleKey.RightArrow:
+                        model.Player.TurnAsync(Direction.Right);
+                        break;
+                }
+                Thread.Sleep(5);
+            }
         }
 
     }

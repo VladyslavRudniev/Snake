@@ -26,6 +26,11 @@ namespace SnakeLulu
         public List<GameEntityUnit<char>> Apples { get => apples; set => apples = value; }
 
         private int widthGameField, heightGameField;
+        private int countApples;
+
+        private int score;
+        public int Score { get => score; set => score = value; }
+
         #endregion
 
         #region Singlton <-- Constructor
@@ -51,16 +56,28 @@ namespace SnakeLulu
             switch (direction)
             {
                 case Direction.Forward:
-                    Parallel.For(0, length, i => wallsForGameField.Add(new GameEntityUnit<char>(x, y--, 'W')));
+                    for (int i = 0; i < length; i++)
+                    {
+                        wallsForGameField.Add(new GameEntityUnit<char>(x, y--, 'W'));
+                    }
                     break;
                 case Direction.Back:
-                    Parallel.For(0, length, i => wallsForGameField.Add(new GameEntityUnit<char>(x, y++, 'W')));
+                    for (int i = 0; i < length; i++)
+                    {
+                        wallsForGameField.Add(new GameEntityUnit<char>(x, y++, 'W'));
+                    }
                     break;
                 case Direction.Left:
-                    Parallel.For(0, length, i => wallsForGameField.Add(new GameEntityUnit<char>(x--, y, 'W')));
+                    for (int i = 0; i < length; i++)
+                    {
+                        wallsForGameField.Add(new GameEntityUnit<char>(x--, y, 'W'));
+                    }
                     break;
                 case Direction.Right:
-                    Parallel.For(0, length, i => wallsForGameField.Add(new GameEntityUnit<char>(x++, y, 'W')));
+                    for (int i = 0; i < length; i++)
+                    {
+                        wallsForGameField.Add(new GameEntityUnit<char>(x++, y, 'W'));
+                    }
                     break;
             }
         }
@@ -86,6 +103,7 @@ namespace SnakeLulu
         }
         public void BuildApples(int count)
         {
+            countApples = count;
             int x, y;
             while (apples.Count != count)
             {
@@ -106,12 +124,12 @@ namespace SnakeLulu
             });
             return result;
         }
-        public bool CheckCoordinateWallsGameField(int x, int y)
+        public bool CheckCoordinateWallsGameField()
         {
             bool result = false;
             Parallel.For(0, wallsForGameField.Count, i =>
             {
-                if (wallsForGameField[i].X == x && wallsForGameField[i].Y == y)
+                if (wallsForGameField[i].X == player.Body[0].X && wallsForGameField[i].Y == player.Body[0].Y)
                     result = true;
             });
             return result;
@@ -123,13 +141,19 @@ namespace SnakeLulu
             {
                 if (apples[i].X == player.Body[0].X && apples[i].Y == player.Body[0].Y)
                 {
+                    score += 10;
                     apples.RemoveAt(i);
                     player.ChangeLengthAsync(1);
-                    BuildApples(2);
+                    BuildApples(countApples);
                     result = true;
                 }
             });
             return result;
+        }
+
+        public void MovePlayer()
+        {
+            player.ChangePositionAsync();
         }
     }
 }
