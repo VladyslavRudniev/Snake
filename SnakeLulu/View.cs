@@ -35,7 +35,7 @@ namespace SnakeLulu
                 case 1:
                     Console.SetCursorPosition(0, 21);
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Score 200 points to open the gate.");
+                    Console.WriteLine("Score 200 points to open next level.");
                     Console.SetCursorPosition(0, 22);
                     break;
             }

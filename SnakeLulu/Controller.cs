@@ -11,7 +11,7 @@ namespace SnakeLulu
         private static Model model;
         private static View view;
         private static GameStatus gameStatus;
-        private static int levelNumber;
+        //private static int levelNumber;
 
         static void Main(string[] args)
         {
@@ -135,16 +135,16 @@ namespace SnakeLulu
                 switch (Console.ReadKey().Key)
                 {
                     case ConsoleKey.UpArrow:
-                        model.Player.TurnAsync(Direction.Forward);
+                        model.Player.Turn(Direction.Forward);
                         break;
                     case ConsoleKey.DownArrow:
-                        model.Player.TurnAsync(Direction.Back);
+                        model.Player.Turn(Direction.Back);
                         break;
                     case ConsoleKey.LeftArrow:
-                        model.Player.TurnAsync(Direction.Left);
+                        model.Player.Turn(Direction.Left);
                         break;
                     case ConsoleKey.RightArrow:
-                        model.Player.TurnAsync(Direction.Right);
+                        model.Player.Turn(Direction.Right);
                         break;
                 }
                 Thread.Sleep(5);

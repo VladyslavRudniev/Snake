@@ -10,6 +10,9 @@ namespace SnakeLulu
         #region <-- Fields and properties
         Random random = new Random();
 
+        private LevelInfo levelInfo;
+        internal LevelInfo LevelInfo { get => levelInfo; set => levelInfo = value; }
+
         private List<GameEntityUnit<char>> wallsForGameField;
         public List<GameEntityUnit<char>> WallsForGameField { get => wallsForGameField; set => wallsForGameField = value; }
         
@@ -154,6 +157,11 @@ namespace SnakeLulu
         public void MovePlayer()
         {
             player.ChangePositionAsync();
+        }
+
+        public void NewLevelInfo()
+        {
+
         }
     }
 }
