@@ -225,19 +225,40 @@ namespace SnakeLulu
                 Console.WriteLine(menuItem2);
             }
         }
-        public void ShowCountdownBefore()
+        public void ShowCountdownBefore(object arg)
         {
+            CancellationToken cancellationToken = (CancellationToken)arg;
             for (int i = 3; i > 0; i--)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
                 Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
                 Console.Write(i);
                 Thread.Sleep(300);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
                 Console.Write('.');
                 Thread.Sleep(300);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
                 Console.Write('.');
                 Thread.Sleep(200);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
                 Console.Write('.');
                 Thread.Sleep(200);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
                 Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
                 Console.Write("    ");
             }

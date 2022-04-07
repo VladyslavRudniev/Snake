@@ -220,15 +220,17 @@ namespace SnakeLulu
             {
                 x = random.Next(1, levelInfo.MaxWidthGameField - 1);
                 y = random.Next(1, levelInfo.MaxHeightGameField - 1);
-                if (!CheckCoordinatePlayer(x, y))
+                if (!CheckCoordinatePlayer(x, y, 0) & !CheckCoordinateWalls(x, y) & !CheckCoordinateApples(x, y))
+                {
                     apples.Add(new GameEntityUnit<char>(x, y, '$'));
+                }
             }
         }
 
-        private bool CheckCoordinatePlayer(int x, int y)
+        private bool CheckCoordinatePlayer(int x, int y, int startIndex)
         {
             bool result = false;
-            for (int i = 0; i < player.Body.Length; i++)
+            for (int i = startIndex; i < player.Body.Length; i++)
             {
                 if (player.Body[i].X == x && player.Body[i].Y == y)
                     result = true;
@@ -236,26 +238,20 @@ namespace SnakeLulu
             return result;
         }
         public bool CheckCoordinatePlayerForPlayer()
-        {
-            bool result = false;
-            Parallel.For(3, player.Body.Length, i => 
-            {
-                if (player.Body[i].X == player.Body[0].X && player.Body[i].Y == player.Body[0].Y)
-                    result = true;
-            });
-            return result;
-        }
-        public bool CheckCoordinateWalls()
+            => CheckCoordinatePlayer(player.Body[0].X, player.Body[0].Y, 3);
+        public bool CheckCoordinateWalls(int x, int y)
         {
             bool result = false;
             Parallel.For(0, walls.Count, i =>
             {
-                if (walls[i].X == player.Body[0].X && walls[i].Y == player.Body[0].Y)
+                if (walls[i].X == x && walls[i].Y == y)
                     result = true;
             });
             return result;
         }
-        public bool CheckCoordinateGate()
+        public bool CheckCoordinateWallsForPlayer()
+    => CheckCoordinateWalls(player.Body[0].X, player.Body[0].Y);
+        public bool CheckCoordinateGateForPlayer()
         {
             bool result = false;
             Parallel.For(0, gate.Count, i =>
@@ -265,12 +261,12 @@ namespace SnakeLulu
             });
             return result;
         }
-        public bool CheckCoordinateApplesForPlayer()
+        public bool CheckCoordinateApples(int x, int y)
         {
             bool result = false;
             for (int i = 0; i < apples.Count; i++)
             {
-                if (apples[i].X == player.Body[0].X && apples[i].Y == player.Body[0].Y)
+                if (apples[i].X == x && apples[i].Y == y)
                 {
                     levelInfo.Score += 10;
                     apples.RemoveAt(i);
@@ -281,6 +277,8 @@ namespace SnakeLulu
             }
             return result;
         }
+        public bool CheckCoordinateApplesForPlayer()
+    => CheckCoordinateApples(player.Body[0].X, player.Body[0].Y);
 
         public bool CheckForChangesAfterAddingScore()
         {
@@ -290,6 +288,14 @@ namespace SnakeLulu
             if (levelInfo.Score == levelInfo.RequiredScore)
             {
                 BuildGate();
+                return true;
+            }
+            return false;
+        }
+        public bool CheckImplementationLevelTask()
+        {
+            if (levelInfo.Score == levelInfo.RequiredScore)
+            {
                 return true;
             }
             return false;
@@ -330,7 +336,7 @@ namespace SnakeLulu
                     break;
                 case 2:
                     levelInfo.Score = 0;
-                    levelInfo.RequiredScore = 270;
+                    levelInfo.RequiredScore = 30;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     levelInfo.MaxCountOfApples = 2;
                     levelInfo.LevelNumber = 2;
                     levelInfo.LevelTask = "Score 270 points to open next level.";
@@ -351,8 +357,46 @@ namespace SnakeLulu
                         new ParamForBuildWall(40, 0, 15, Direction.Back),
                         new ParamForBuildWall(40, 15, 40, Direction.Left),
                         new ParamForBuildWall(0, 15, 15, Direction.Forward),
+                        new ParamForBuildWall(19, 14, 7, Direction.Forward),
+                        new ParamForBuildWall(29, 1, 7, Direction.Back),
+                        new ParamForBuildWall(1, 5, 17, Direction.Right),
                     };
                     levelInfo.Gate = new ParamForBuildWall(40, 6, 4, Direction.Back);
+                    break;
+                case 3:
+                    levelInfo.Score = 0;
+                    levelInfo.RequiredScore = 240;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    levelInfo.MaxCountOfApples = 2;
+                    levelInfo.LevelNumber = 3;
+                    levelInfo.LevelTask = "Score 240 points to open next level.";
+
+                    levelInfo.CoordinateYForOutputLevelTask = 21;
+                    levelInfo.CoordinateYForOutputScore = 22;
+                    levelInfo.MaxHeightGameField = 20;
+                    levelInfo.MaxWidthGameField = 30;
+
+                    levelInfo.SpeedIncreaseFrequency = 30;
+                    levelInfo.CoordinateXStartPlayerPos = 3;
+                    levelInfo.CoordinateYStartPlayerPos = 4;
+                    levelInfo.DirectionStartBodyPlayer = Direction.Left;
+
+                    levelInfo.ParamForBuildWalls = new ParamForBuildWall[]
+                    {
+                        new ParamForBuildWall(0, 0, 30, Direction.Right),
+                        new ParamForBuildWall(14, 1, 2, Direction.Back),
+                        new ParamForBuildWall(30, 0, 20, Direction.Back),
+                        new ParamForBuildWall(30, 20, 9, Direction.Left),
+                        new ParamForBuildWall(21, 20, 15, Direction.Forward),
+                        new ParamForBuildWall(21, 8, 4, Direction.Left),
+                        new ParamForBuildWall(15, 8, 9, Direction.Left),
+                        new ParamForBuildWall(10, 8, 2, Direction.Back),
+                        new ParamForBuildWall(10, 10, 6, Direction.Right),
+                        new ParamForBuildWall(16, 10, 10, Direction.Back),
+                        new ParamForBuildWall(16, 20, 16, Direction.Left),
+                        new ParamForBuildWall(0, 20, 20, Direction.Forward),
+                        new ParamForBuildWall(21, 20, 5, Direction.Left),
+                    };
+                    levelInfo.Gate = new ParamForBuildWall(24, 20, 4, Direction.Right);
                     break;
             }
         }

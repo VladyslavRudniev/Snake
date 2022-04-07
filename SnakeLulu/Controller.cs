@@ -11,6 +11,8 @@ namespace SnakeLulu
         private static Model model;
         private static View view;
         private static int currentLevelNumber;
+        private static CancellationTokenSource cancellation;
+        private static Task ShowCountdownBeforeTask;
 
         static void Main(string[] args)
         {
@@ -33,7 +35,7 @@ namespace SnakeLulu
         }
         static void ShowGameIntro()
         {
-            CancellationTokenSource cancellation = new CancellationTokenSource();
+            cancellation = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellation.Token;
             Task task = new Task(view.ShowGameIntro, cancellationToken);
             task.Start();
@@ -43,6 +45,18 @@ namespace SnakeLulu
                 if (!task.IsCompleted)
                     cancellation.Cancel();
                 task.Wait();
+            }
+            catch { }
+        }
+        static void ShowCountdownBefore()
+        {
+            cancellation = new CancellationTokenSource();
+            CancellationToken cancellationToken = cancellation.Token;
+            ShowCountdownBeforeTask = new Task(view.ShowCountdownBefore, cancellationToken);
+            ShowCountdownBeforeTask.Start();
+            try
+            {
+                ShowCountdownBeforeTask.Wait();
             }
             catch { }
         }
@@ -148,8 +162,16 @@ namespace SnakeLulu
             view.DrawPlayer();
             view.DrawApples();
             view.ShowLevelInfo();
-            view.ShowCountdownBefore();//HACK canceletion token
-            view.ShowLevelScore();
+            ShowCountdownBefore();
+
+            if (model.GameStatus == GameStatus.FlowGame)
+            {
+                view.ShowLevelScore();
+                if (model.CheckImplementationLevelTask())
+                {
+                    view.DrawGate();
+                }
+            }
 
             while (model.GameStatus == GameStatus.FlowGame)
             {
@@ -170,11 +192,11 @@ namespace SnakeLulu
                     view.ShowLevelScore();
                 }
                 
-                if (model.CheckCoordinateWalls())
+                if (model.CheckCoordinateWallsForPlayer())
                 {
                     model.GameStatus = GameStatus.OverGame;
                 }
-                if (model.CheckCoordinateGate())
+                if (model.CheckCoordinateGateForPlayer())
                 {
                     currentLevelNumber++;
                     //TODO smooth transition
@@ -188,10 +210,6 @@ namespace SnakeLulu
                 Thread.Sleep(300 - (model.Player.Speed * 20));
             }
 
-            if (model.GameStatus == GameStatus.OverGame)
-            {
-                view.ShowEndGame();
-            }
             if (model.GameStatus == GameStatus.NextLevel)
             {
                 view.ShowMessageNextLevel();
@@ -217,13 +235,21 @@ namespace SnakeLulu
                         break;
                     case ConsoleKey.Escape:
                         model.GameStatus = GameStatus.PausedGame;
+                        if (!ShowCountdownBeforeTask.IsCompleted)
+                            cancellation.Cancel();
                         OpenMenu();
                         break;
+                    default:
+                        if (!ShowCountdownBeforeTask.IsCompleted)
+                            cancellation.Cancel();
+                        break;
                 }
-                Thread.Sleep(300 - (model.Player.Speed * 20));//TODO Задержка перед выходом в меню
+                Thread.Sleep(300 - (model.Player.Speed * 20));
             }
             if (model.GameStatus == GameStatus.OverGame)
             {
+                view.ShowEndGame();
+                Console.ReadKey();
                 model.GameStatus = GameStatus.NewGame;
                 OpenMenu();
             }

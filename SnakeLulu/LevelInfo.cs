@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SnakeLulu
 {
-    struct LevelInfo
+    public struct LevelInfo
     {
         private int levelNumber;
         private ParamForBuildWall[] paramForBuildWalls;
