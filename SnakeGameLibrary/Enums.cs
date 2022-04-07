@@ -21,8 +21,10 @@
     }
     public enum GameStatus : byte
     {
-        Play = 0,
-        Over = 1,
-        Wait = 2,
+        NewGame = 0,
+        FlowGame = 1,
+        OverGame = 2,
+        PausedGame = 3,
+        PassedGame = 4,
     }
 }

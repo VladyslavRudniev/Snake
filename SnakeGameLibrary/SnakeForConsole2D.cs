@@ -4,6 +4,7 @@ namespace SnakeGameLibrary
 {
     public class SnakeForConsole2D : GameEntity<char>, ISnakeForConsole2D
     {
+        public SnakeForConsole2D() : base() { }
         public SnakeForConsole2D(int id, GameEntityUnit<char>[] entityUnits, EntityState state, int speed, Direction direction) : base(id, entityUnits, state, speed, direction) { }
         public override void ChangeLength(int value)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnakeGameLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,36 +29,24 @@ namespace SnakeLulu
         }
         #endregion
 
-        public void ShowLevelInfo(int levelNumber)
+        public void ShowLevelInfo()
         {
-            switch (levelNumber)
-            {
-                case 1:
-                    Console.SetCursorPosition(0, 21);
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Score 200 points to open next level.");
-                    Console.SetCursorPosition(0, 22);
-                    break;
-            }
-            Console.WriteLine($"Score: {model.Score}, ");
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputLevelTask);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(model.LevelInfo.LevelTask);
             Console.ResetColor();
         }
-        public void UpdateLevelInfo(int levelNumber)
+        public void ShowLevelScore()
         {
-            switch (levelNumber)
-            {
-                case 1:
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.SetCursorPosition(0, 22);
-                    break;
-            }
-            Console.WriteLine($"Score: {model.Score}, ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
+            Console.WriteLine($"Score: {model.LevelInfo.Score}, ");
             Console.ResetColor();
         }
         public void DrawWalls()
         {
             Console.BackgroundColor = ConsoleColor.White;
-            foreach (var el in model.WallsForGameField)
+            foreach (var el in model.Walls)
             {
                 Console.SetCursorPosition(el.X, el.Y);
                 Console.Write(' ');
@@ -67,7 +56,7 @@ namespace SnakeLulu
         public void DrawPlayer()
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            for (int i = 0; i < model.Player.Body.Length; i++)
+            for (int i = model.Player.Body.Length - 1; i >= 0; i--)
             {
                 Console.SetCursorPosition(model.Player.Body[i].X, model.Player.Body[i].Y);
                 Console.Write(model.Player.Body[i].Material);
@@ -126,19 +115,45 @@ namespace SnakeLulu
             Console.ReadKey();
             Console.Clear();
         }
-        
+        public void ShowEndGame()
+        {
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
+            Console.WriteLine("                                                  ");
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Game over!");
+        }
+
         public void ShowMenu(MenuItems selectItem)
         {
-            string menuItem1 = "Start game";
+            string menuItem0 = "Continue Game";
+            string menuItem1 = "New game";
             string menuItem2 = "Load game";
             string menuItem3 = "Exit";
-
+            
             Console.Clear();
+
+            if (model.GameStatus == GameStatus.PausedGame)
+            {
+                Console.SetCursorPosition(37, 9);
+                if (selectItem == MenuItems.ContinueGame)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                    Console.WriteLine(">" + menuItem0);
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine(menuItem0);
+                }
+            }
+
+
             Console.SetCursorPosition(37, 12);
             if (selectItem == MenuItems.StartGame)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.WriteLine("> " + menuItem1);
+                Console.WriteLine(">" + menuItem1);
                 Console.ResetColor();
             }
             else
@@ -150,7 +165,7 @@ namespace SnakeLulu
             if (selectItem == MenuItems.LoadGame)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.WriteLine("> " + menuItem2);
+                Console.WriteLine(">" + menuItem2);
                 Console.ResetColor();
             }
             else
@@ -162,12 +177,29 @@ namespace SnakeLulu
             if (selectItem == MenuItems.Exit)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.WriteLine("> " + menuItem3);
+                Console.WriteLine(">" + menuItem3);
                 Console.ResetColor();
             }
             else
             {
                 Console.WriteLine(menuItem3);
+            }
+        }
+        public void ShowCountdownBefore()
+        {
+            for (int i = 3; i > 0; i--)
+            {
+                Console.SetCursorPosition(38, 15);
+                Console.Write(i);
+                Thread.Sleep(300);
+                Console.Write('.');
+                Thread.Sleep(300);
+                Console.Write('.');
+                Thread.Sleep(200);
+                Console.Write('.');
+                Thread.Sleep(200);
+                Console.SetCursorPosition(38, 15);
+                Console.Write("    ");
             }
         }
     }

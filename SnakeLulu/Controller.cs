@@ -10,18 +10,17 @@ namespace SnakeLulu
     {
         private static Model model;
         private static View view;
-        private static GameStatus gameStatus;
-        //private static int levelNumber;
 
         static void Main(string[] args)
         {
             model = Model.GetInstance();
             view = View.GetInstance(model);
-            levelNumber = 1;
+            model.GameStatus = GameStatus.NewGame;
 
             SetOptions();
 
-            ShowGameInroAndOpenMenu();     
+            ShowGameIntro();
+            OpenMenu();
         }
 
         static void SetOptions()
@@ -31,7 +30,7 @@ namespace SnakeLulu
             Console.WindowWidth = 90;
             Console.WindowHeight = 30;
         }
-        static void ShowGameInroAndOpenMenu()
+        static void ShowGameIntro()
         {
             CancellationTokenSource cancellation = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellation.Token;
@@ -45,10 +44,23 @@ namespace SnakeLulu
                 task.Wait();
             }
             catch { }
+        }
 
-            view.ShowMenu(MenuItems.StartGame);
-            int index = 0;
+        static void OpenMenu()
+        {
             bool isSelected = false;
+            int index = 0;
+            if (model.GameStatus == GameStatus.NewGame)
+            {
+                view.ShowMenu(MenuItems.StartGame);
+                index = 0;
+            }
+            if (model.GameStatus == GameStatus.PausedGame)
+            {
+                view.ShowMenu(MenuItems.ContinueGame);
+                index = 3;
+            }
+
             while (!isSelected)
             {
                 view.ShowMenu((MenuItems)index);
@@ -56,47 +68,69 @@ namespace SnakeLulu
                 {
                     case ConsoleKey.UpArrow:
                         --index;
-                        if (index == -1)
-                            index = 2;
+                        if (model.GameStatus == GameStatus.NewGame)
+                        {
+                            if (index == -1)
+                                index = 2;
+                        }
+                        if (model.GameStatus == GameStatus.PausedGame)
+                        {
+                            if (index == -1)
+                                index = 3;
+                        }
                         break;
                     case ConsoleKey.DownArrow:
                         ++index;
-                        if (index == 3)
-                            index = 0;
+                        if (model.GameStatus == GameStatus.NewGame)
+                        {
+                            if (index == 3)
+                                index = 0;
+                        }
+                        if (model.GameStatus == GameStatus.PausedGame)
+                        {
+                            if (index == 4)
+                                index = 0;
+                        }
                         break;
                     case ConsoleKey.Enter:
                         isSelected = true;
                         break;
                 }
             }
+
             Console.Clear();
             switch (index)
             {
                 case 0:
-                    BuildGameModel();
+                    CreateNewGameLevel(1);
                     PlayGameAsync();
-                    ControlSnake();
+                    ControlGame();
                     break;
                 case 1:
-
-                    //break;
+                    //TODO
+                    break;
                 case 2:
                     Environment.Exit(0);
                     break;
+                case 3:
+                    model.GameStatus = GameStatus.FlowGame;
+                    PlayGameAsync();
+                    ControlGame();
+                    break;
             }
         }
-        static void BuildGameModel()
+        static void CreateNewGameLevel(int levelNumber)
         {
-            view.ShowLevelInfo(levelNumber);
-            model.BuildWallAboutGameField(40, 20);
-            view.DrawWalls();
+            model.NewLevelInfo(levelNumber);
+            model.ClearModel();
+
+            model.BuildWalls();
 
             model.BuildPlayer();
+            
+            model.BuildApples();
 
-            model.BuildApples(2);
-            view.DrawApples();
-
-            gameStatus = GameStatus.Play;
+            model.GameStatus = GameStatus.FlowGame;
         }
         static async void PlayGameAsync()
         {
@@ -104,33 +138,43 @@ namespace SnakeLulu
         }
         static void PlayGame()
         {
-            while (true)
+            view.DrawWalls();
+            view.DrawPlayer();
+            view.DrawApples();
+            view.ShowLevelInfo();
+            view.ShowLevelScore();
+            view.ShowCountdownBefore();
+
+            while (model.GameStatus == GameStatus.FlowGame)
             {
                 model.MovePlayer();
                 view.DrawPlayer();
 
                 if (model.CheckCoordinateApplesForPlayer())
                 {
-                    view.UpdateLevelInfo(levelNumber);
+                    view.ShowLevelScore();
                     view.DrawApples();
                 }
                 
                 if (model.CheckCoordinateWallsGameField())
                 {
-                    break;
+                    model.GameStatus = GameStatus.OverGame;
                 }
-                Thread.Sleep(400);
-            }
 
-            gameStatus = GameStatus.Over;
-            Console.SetCursorPosition(0, 24);
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Game over!!!");
-            Console.ReadKey();
+                if (model.CheckCoordinatePlayerForPlayer())
+                {
+                    model.GameStatus = GameStatus.OverGame;
+                }
+                Thread.Sleep(400 - (model.Player.Speed * 20));
+            }
+            if (model.GameStatus == GameStatus.OverGame)
+            {
+                view.ShowEndGame();
+            }
         }
-        static void ControlSnake()
+        static void ControlGame()
         {
-            while (gameStatus == GameStatus.Play)
+            while (model.GameStatus == GameStatus.FlowGame)
             {
                 switch (Console.ReadKey().Key)
                 {
@@ -146,8 +190,17 @@ namespace SnakeLulu
                     case ConsoleKey.RightArrow:
                         model.Player.Turn(Direction.Right);
                         break;
+                    case ConsoleKey.Escape:
+                        model.GameStatus = GameStatus.PausedGame;
+                        OpenMenu();
+                        break;
                 }
-                Thread.Sleep(5);
+                Thread.Sleep(10);
+            }
+            if (model.GameStatus == GameStatus.OverGame)
+            {
+                model.GameStatus = GameStatus.NewGame;
+                OpenMenu();
             }
         }
 
