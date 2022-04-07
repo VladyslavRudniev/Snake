@@ -12,5 +12,6 @@ namespace SnakeLulu
         LoadGame = 1,
         Exit = 2,
         ContinueGame = 3,
+        SaveGame = 4,
     }
 }

@@ -40,7 +40,7 @@ namespace SnakeLulu
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
-            Console.WriteLine($"Score: {model.LevelInfo.Score}, ");
+            Console.WriteLine($"Score: {model.LevelInfo.Score} ");
             Console.ResetColor();
         }
         public void DrawWalls()
@@ -52,6 +52,17 @@ namespace SnakeLulu
                 Console.Write(' ');
             }
             Console.BackgroundColor = ConsoleColor.Black;
+        }
+        public void DrawGate()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.ForegroundColor = ConsoleColor.Green;
+            foreach (var el in model.Gate)
+            {
+                Console.SetCursorPosition(el.X, el.Y);
+                Console.Write(el.Material);
+            }
+            Console.ResetColor();
         }
         public void DrawPlayer()
         {
@@ -70,6 +81,15 @@ namespace SnakeLulu
                 Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
                 Console.Write(model.Apples[i].Material);
             }
+        }
+        public void PutAwayApples()
+        {
+            for (int i = 0; i < model.Apples.Count; i++)
+            {
+                Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
+                Console.Write(' ');
+            }
+            model.Apples.Clear();
         }
 
         public void ShowGameIntro(object arg)
@@ -121,16 +141,24 @@ namespace SnakeLulu
             Console.WriteLine("                                                  ");
             Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Game over!");
+            Console.WriteLine("Game over =( Press enter to try again!");
         }
-
+        public void ShowMessageNextLevel()
+        {
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
+            Console.WriteLine("                                                  ");
+            Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Great =) Press enter to continue.");
+        }
         public void ShowMenu(MenuItems selectItem)
         {
-            string menuItem0 = "Continue Game";
-            string menuItem1 = "New game";
-            string menuItem2 = "Load game";
-            string menuItem3 = "Exit";
-            
+            string menuItem0 = "New game";
+            string menuItem1 = "Load game";
+            string menuItem2 = "Exit";
+            string menuItem3 = "Continue Game";
+            string menuItem4 = "Save Game";
+
             Console.Clear();
 
             if (model.GameStatus == GameStatus.PausedGame)
@@ -139,18 +167,42 @@ namespace SnakeLulu
                 if (selectItem == MenuItems.ContinueGame)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkBlue;
-                    Console.WriteLine(">" + menuItem0);
+                    Console.WriteLine(">" + menuItem3);
                     Console.ResetColor();
                 }
                 else
                 {
-                    Console.WriteLine(menuItem0);
+                    Console.WriteLine(menuItem3);
+                }
+
+                Console.SetCursorPosition(37, 12);
+                if (selectItem == MenuItems.SaveGame)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                    Console.WriteLine(">" + menuItem4);
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine(menuItem4);
                 }
             }
 
 
-            Console.SetCursorPosition(37, 12);
+            Console.SetCursorPosition(37, 15);
             if (selectItem == MenuItems.StartGame)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkBlue;
+                Console.WriteLine(">" + menuItem0);
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.WriteLine(menuItem0);
+            }
+
+            Console.SetCursorPosition(37, 18);
+            if (selectItem == MenuItems.LoadGame)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
                 Console.WriteLine(">" + menuItem1);
@@ -161,8 +213,8 @@ namespace SnakeLulu
                 Console.WriteLine(menuItem1);
             }
 
-            Console.SetCursorPosition(37, 15);
-            if (selectItem == MenuItems.LoadGame)
+            Console.SetCursorPosition(37, 21);
+            if (selectItem == MenuItems.Exit)
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
                 Console.WriteLine(">" + menuItem2);
@@ -172,24 +224,12 @@ namespace SnakeLulu
             {
                 Console.WriteLine(menuItem2);
             }
-
-            Console.SetCursorPosition(37, 18);
-            if (selectItem == MenuItems.Exit)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkBlue;
-                Console.WriteLine(">" + menuItem3);
-                Console.ResetColor();
-            }
-            else
-            {
-                Console.WriteLine(menuItem3);
-            }
         }
         public void ShowCountdownBefore()
         {
             for (int i = 3; i > 0; i--)
             {
-                Console.SetCursorPosition(38, 15);
+                Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
                 Console.Write(i);
                 Thread.Sleep(300);
                 Console.Write('.');
@@ -198,7 +238,7 @@ namespace SnakeLulu
                 Thread.Sleep(200);
                 Console.Write('.');
                 Thread.Sleep(200);
-                Console.SetCursorPosition(38, 15);
+                Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputScore);
                 Console.Write("    ");
             }
         }

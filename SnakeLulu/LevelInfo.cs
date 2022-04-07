@@ -23,6 +23,7 @@ namespace SnakeLulu
         private int coordinateYStartPlayerPos;
         private Direction directionStartBodyPlayer;
         private int speedIncreaseFrequency;
+        private ParamForBuildWall gate;
 
         public int LevelNumber { get => levelNumber; set => levelNumber = value; }
         public string LevelTask { get => levelTask; set => levelTask = value; }
@@ -38,5 +39,6 @@ namespace SnakeLulu
         public Direction DirectionStartBodyPlayer { get => directionStartBodyPlayer; set => directionStartBodyPlayer = value; }
         public int SpeedIncreaseFrequency { get => speedIncreaseFrequency; set => speedIncreaseFrequency = value; }
         internal ParamForBuildWall[] ParamForBuildWalls { get => paramForBuildWalls; set => paramForBuildWalls = value; }
+        internal ParamForBuildWall Gate { get => gate; set => gate = value; }
     }
 }

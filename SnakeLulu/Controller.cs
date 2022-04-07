@@ -10,6 +10,7 @@ namespace SnakeLulu
     {
         private static Model model;
         private static View view;
+        private static int currentLevelNumber;
 
         static void Main(string[] args)
         {
@@ -76,7 +77,7 @@ namespace SnakeLulu
                         if (model.GameStatus == GameStatus.PausedGame)
                         {
                             if (index == -1)
-                                index = 3;
+                                index = 4;
                         }
                         break;
                     case ConsoleKey.DownArrow:
@@ -88,7 +89,7 @@ namespace SnakeLulu
                         }
                         if (model.GameStatus == GameStatus.PausedGame)
                         {
-                            if (index == 4)
+                            if (index == 5)
                                 index = 0;
                         }
                         break;
@@ -102,7 +103,8 @@ namespace SnakeLulu
             switch (index)
             {
                 case 0:
-                    CreateNewGameLevel(1);
+                    currentLevelNumber = 1;
+                    CreateNewGameLevel();
                     PlayGameAsync();
                     ControlGame();
                     break;
@@ -117,11 +119,14 @@ namespace SnakeLulu
                     PlayGameAsync();
                     ControlGame();
                     break;
+                case 4:
+                    //TODO
+                    break;
             }
         }
-        static void CreateNewGameLevel(int levelNumber)
+        static void CreateNewGameLevel()
         {
-            model.NewLevelInfo(levelNumber);
+            model.NewLevelInfo(currentLevelNumber);
             model.ClearModel();
 
             model.BuildWalls();
@@ -138,12 +143,13 @@ namespace SnakeLulu
         }
         static void PlayGame()
         {
+            Console.Clear();
             view.DrawWalls();
             view.DrawPlayer();
             view.DrawApples();
             view.ShowLevelInfo();
+            view.ShowCountdownBefore();//HACK canceletion token
             view.ShowLevelScore();
-            view.ShowCountdownBefore();
 
             while (model.GameStatus == GameStatus.FlowGame)
             {
@@ -152,24 +158,43 @@ namespace SnakeLulu
 
                 if (model.CheckCoordinateApplesForPlayer())
                 {
+                    if(model.CheckForChangesAfterAddingScore())
+                    {
+                        view.PutAwayApples();
+                        view.DrawGate();
+                    }
+                    else
+                    {
+                        view.DrawApples();
+                    }
                     view.ShowLevelScore();
-                    view.DrawApples();
                 }
                 
-                if (model.CheckCoordinateWallsGameField())
+                if (model.CheckCoordinateWalls())
                 {
                     model.GameStatus = GameStatus.OverGame;
+                }
+                if (model.CheckCoordinateGate())
+                {
+                    currentLevelNumber++;
+                    //TODO smooth transition
+                    model.GameStatus = GameStatus.NextLevel;
                 }
 
                 if (model.CheckCoordinatePlayerForPlayer())
                 {
                     model.GameStatus = GameStatus.OverGame;
                 }
-                Thread.Sleep(400 - (model.Player.Speed * 20));
+                Thread.Sleep(300 - (model.Player.Speed * 20));
             }
+
             if (model.GameStatus == GameStatus.OverGame)
             {
                 view.ShowEndGame();
+            }
+            if (model.GameStatus == GameStatus.NextLevel)
+            {
+                view.ShowMessageNextLevel();
             }
         }
         static void ControlGame()
@@ -195,14 +220,19 @@ namespace SnakeLulu
                         OpenMenu();
                         break;
                 }
-                Thread.Sleep(10);
+                Thread.Sleep(300 - (model.Player.Speed * 20));//TODO Задержка перед выходом в меню
             }
             if (model.GameStatus == GameStatus.OverGame)
             {
                 model.GameStatus = GameStatus.NewGame;
                 OpenMenu();
             }
+            if (model.GameStatus == GameStatus.NextLevel)
+            {
+                CreateNewGameLevel();
+                PlayGameAsync();
+                ControlGame();
+            }
         }
-
     }
 }

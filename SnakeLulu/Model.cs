@@ -15,7 +15,10 @@ namespace SnakeLulu
 
         private List<GameEntityUnit<char>> walls;
         public List<GameEntityUnit<char>> Walls { get => walls; set => walls = value; }
-        
+
+        private List<GameEntityUnit<char>> gate;
+        public List<GameEntityUnit<char>> Gate { get => gate; set => gate = value; }
+
         private int levelScore;
         public int LevelScore { get => levelScore; set => levelScore = value; }
 
@@ -33,6 +36,7 @@ namespace SnakeLulu
         #region Singlton <-- Constructor
         protected Model()
         {
+            this.gate = new List<GameEntityUnit<char>>();
             this.walls = new List<GameEntityUnit<char>>();
             this.apples = new List<GameEntityUnit<char>>();
         }
@@ -49,6 +53,7 @@ namespace SnakeLulu
 
         public void ClearModel()
         {
+            this.gate = new List<GameEntityUnit<char>>();
             this.walls = new List<GameEntityUnit<char>>();
             this.apples = new List<GameEntityUnit<char>>();
         }
@@ -87,6 +92,38 @@ namespace SnakeLulu
             foreach (var item in levelInfo.ParamForBuildWalls)
             {
                 BuildWall(item.StartX, item.StartY, item.Length, item.Direction);
+            }
+        }
+        public void BuildGate()
+        {
+            int x = levelInfo.Gate.StartX;
+            int y = levelInfo.Gate.StartY;
+            switch (levelInfo.Gate.Direction)
+            {
+                case Direction.Forward:
+                    for (int i = 0; i < levelInfo.Gate.Length; i++)
+                    {
+                        gate.Add(new GameEntityUnit<char>(x, y--, '/'));
+                    }
+                    break;
+                case Direction.Back:
+                    for (int i = 0; i < levelInfo.Gate.Length; i++)
+                    {
+                        gate.Add(new GameEntityUnit<char>(x, y++, '/'));
+                    }
+                    break;
+                case Direction.Left:
+                    for (int i = 0; i < levelInfo.Gate.Length; i++)
+                    {
+                        gate.Add(new GameEntityUnit<char>(x--, y, '/'));
+                    }
+                    break;
+                case Direction.Right:
+                    for (int i = 0; i < levelInfo.Gate.Length; i++)
+                    {
+                        gate.Add(new GameEntityUnit<char>(x++, y, '/'));
+                    }
+                    break;
             }
         }
         public void BuildPlayer()
@@ -191,24 +228,24 @@ namespace SnakeLulu
         private bool CheckCoordinatePlayer(int x, int y)
         {
             bool result = false;
-            Parallel.For(0, player.Body.Length, i =>
+            for (int i = 0; i < player.Body.Length; i++)
             {
                 if (player.Body[i].X == x && player.Body[i].Y == y)
                     result = true;
-            });
+            }
             return result;
         }
         public bool CheckCoordinatePlayerForPlayer()
         {
             bool result = false;
-            Parallel.For(1, player.Body.Length, i =>
+            Parallel.For(3, player.Body.Length, i => 
             {
                 if (player.Body[i].X == player.Body[0].X && player.Body[i].Y == player.Body[0].Y)
                     result = true;
             });
             return result;
         }
-        public bool CheckCoordinateWallsGameField()
+        public bool CheckCoordinateWalls()
         {
             bool result = false;
             Parallel.For(0, walls.Count, i =>
@@ -218,33 +255,49 @@ namespace SnakeLulu
             });
             return result;
         }
+        public bool CheckCoordinateGate()
+        {
+            bool result = false;
+            Parallel.For(0, gate.Count, i =>
+            {
+                if (gate[i].X == player.Body[0].X && gate[i].Y == player.Body[0].Y)
+                    result = true;
+            });
+            return result;
+        }
         public bool CheckCoordinateApplesForPlayer()
         {
             bool result = false;
-            Parallel.For(0, apples.Count, i =>
+            for (int i = 0; i < apples.Count; i++)
             {
                 if (apples[i].X == player.Body[0].X && apples[i].Y == player.Body[0].Y)
                 {
                     levelInfo.Score += 10;
                     apples.RemoveAt(i);
                     BuildApples();
-                    player.ChangeLengthAsync(1);
-                    CheckForChangesAfterAddingScore();
+                    player.ChangeLength(1);
                     result = true;
                 }
-            });
+            }
             return result;
         }
 
-        public void CheckForChangesAfterAddingScore()
+        public bool CheckForChangesAfterAddingScore()
         {
             int valueIncreaseSpeed = levelInfo.Score / levelInfo.SpeedIncreaseFrequency;
             player.Speed = valueIncreaseSpeed;
+
+            if (levelInfo.Score == levelInfo.RequiredScore)
+            {
+                BuildGate();
+                return true;
+            }
+            return false;
         }
 
         public void MovePlayer()
         {
-            player.ChangePositionAsync();
+            player.ChangePosition();
         }
 
         public void NewLevelInfo(int levelNumber)
@@ -254,7 +307,7 @@ namespace SnakeLulu
             {
                 case 1:
                     levelInfo.Score = 0;
-                    levelInfo.RequiredScore = 300;
+                    levelInfo.RequiredScore = 30;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     levelInfo.MaxCountOfApples = 2;
                     levelInfo.LevelNumber = 1;
                     levelInfo.LevelTask = "Score 300 points to open next level.";
@@ -272,7 +325,34 @@ namespace SnakeLulu
                         new ParamForBuildWall(20, 0, 20, Direction.Back),
                         new ParamForBuildWall(20, 20, 20, Direction.Left),
                         new ParamForBuildWall(0, 20, 20, Direction.Forward),
-            };
+                    };
+                    levelInfo.Gate = new ParamForBuildWall(20, 8, 4, Direction.Back);
+                    break;
+                case 2:
+                    levelInfo.Score = 0;
+                    levelInfo.RequiredScore = 270;
+                    levelInfo.MaxCountOfApples = 2;
+                    levelInfo.LevelNumber = 2;
+                    levelInfo.LevelTask = "Score 270 points to open next level.";
+
+                    levelInfo.CoordinateYForOutputLevelTask = 16;
+                    levelInfo.CoordinateYForOutputScore = 17;
+                    levelInfo.MaxHeightGameField = 15;
+                    levelInfo.MaxWidthGameField = 40;
+
+                    levelInfo.SpeedIncreaseFrequency = 30;
+                    levelInfo.CoordinateXStartPlayerPos = 6;
+                    levelInfo.CoordinateYStartPlayerPos = 3;
+                    levelInfo.DirectionStartBodyPlayer = Direction.Left;
+
+                    levelInfo.ParamForBuildWalls = new ParamForBuildWall[]
+                    {
+                        new ParamForBuildWall(0, 0, 40, Direction.Right),
+                        new ParamForBuildWall(40, 0, 15, Direction.Back),
+                        new ParamForBuildWall(40, 15, 40, Direction.Left),
+                        new ParamForBuildWall(0, 15, 15, Direction.Forward),
+                    };
+                    levelInfo.Gate = new ParamForBuildWall(40, 6, 4, Direction.Back);
                     break;
             }
         }

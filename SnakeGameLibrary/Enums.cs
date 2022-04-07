@@ -26,5 +26,6 @@
         OverGame = 2,
         PausedGame = 3,
         PassedGame = 4,
+        NextLevel = 5,
     }
 }
