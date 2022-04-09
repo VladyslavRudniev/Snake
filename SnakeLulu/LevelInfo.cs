@@ -15,6 +15,9 @@ namespace SnakeLulu
         private int score;
         private int requiredScore;
         private int maxCountOfApples;
+        private int maxCountOfSnakeBots;
+        private int coordinateXStartSnakeBotPos;
+        private int coordinateYStartSnakeBotPos;
         private int coordinateYForOutputLevelTask;
         private int coordinateYForOutputScore;
         private int maxWidthGameField;
@@ -38,6 +41,9 @@ namespace SnakeLulu
         public int CoordinateYStartPlayerPos { get => coordinateYStartPlayerPos; set => coordinateYStartPlayerPos = value; }
         public Direction DirectionStartBodyPlayer { get => directionStartBodyPlayer; set => directionStartBodyPlayer = value; }
         public int SpeedIncreaseFrequency { get => speedIncreaseFrequency; set => speedIncreaseFrequency = value; }
+        public int MaxCountOfSnakeBots { get => maxCountOfSnakeBots; set => maxCountOfSnakeBots = value; }
+        public int CoordinateYStartSnakeBotPos { get => coordinateYStartSnakeBotPos; set => coordinateYStartSnakeBotPos = value; }
+        public int CoordinateXStartSnakeBotPos { get => coordinateXStartSnakeBotPos; set => coordinateXStartSnakeBotPos = value; }
         internal ParamForBuildWall[] ParamForBuildWalls { get => paramForBuildWalls; set => paramForBuildWalls = value; }
         internal ParamForBuildWall Gate { get => gate; set => gate = value; }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SnakeGameLibrary
 {
-    public abstract class GameEntity<T> : IEnumerable
+    public abstract class GameEntity<T>
     {
         private GameEntityUnit<T>[] body;
         public GameEntityUnit<T>[] Body { get => body; set => body = value; }
@@ -51,9 +51,5 @@ namespace SnakeGameLibrary
         public abstract void ChangeLength(int value);
         public abstract void ChangeSpeed(int value);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return body.GetEnumerator();
-        }
     }
 }

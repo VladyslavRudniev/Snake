@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ namespace SnakeLulu
     class View
     {
         Model model;
+        Task soundTask;
 
         #region Singlton <-- Constructor
         static View view;
@@ -72,6 +74,11 @@ namespace SnakeLulu
                 Console.SetCursorPosition(model.Player.Body[i].X, model.Player.Body[i].Y);
                 Console.Write(model.Player.Body[i].Material);
             }
+            if (!model.IsSoundOff)
+            {
+                soundTask = new Task(() => Console.Beep(500, 30));
+                soundTask.Start();
+            }
         }
         public void DrawApples()
         {
@@ -80,6 +87,11 @@ namespace SnakeLulu
             {
                 Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
                 Console.Write(model.Apples[i].Material);
+            }
+            if (!model.IsSoundOff)
+            {
+                soundTask = new Task(() => Console.Beep(500, 150));
+                soundTask.Start();
             }
         }
         public void PutAwayApples()
@@ -131,6 +143,40 @@ namespace SnakeLulu
                     Console.Write(el);
                     Thread.Sleep(50);
                 }
+            }
+            Console.ReadKey();
+            Console.Clear();
+        }
+        public void ShowGameСompletion(object arg)
+        {
+            CancellationToken cancellationToken = (CancellationToken)arg;
+            string text1 = "\u00abLulu snake\u00bb game";
+            string text2 = ">>Fine! You helped Lulu overcome difficulties and return home.\n";
+
+            Console.Clear();
+            Console.SetCursorPosition(37, 11);
+            foreach (var el in text1)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.Clear();
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+                Console.Write(el);
+                Thread.Sleep(100);
+            }
+            Thread.Sleep(1000);
+
+            Console.SetCursorPosition(0, 13);
+            foreach (var el in text2)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    Console.Clear();
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+                Console.Write(el);
+                Thread.Sleep(50);
             }
             Console.ReadKey();
             Console.Clear();
@@ -224,6 +270,12 @@ namespace SnakeLulu
             {
                 Console.WriteLine(menuItem2);
             }
+
+            Console.SetCursorPosition(0, 28);
+            string temp = model.IsSoundOff ? "Sound off" : "Sound on";
+            Console.Write(temp);
+            Console.SetCursorPosition(0, 29);
+            Console.Write("Press Tab to off/on sound.");
         }
         public void ShowCountdownBefore(object arg)
         {

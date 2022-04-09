@@ -44,12 +44,6 @@ namespace SnakeGameLibrary
                 case Direction.Right:
                     ++this.Body[0].X;
                     break;
-                case Direction.Up:
-                    ++this.Body[0].Z;
-                    break;
-                case Direction.Down:
-                    --this.Body[0].Z;
-                    break;
             }
         }
         public virtual async void ChangePositionAsync()
@@ -67,7 +61,7 @@ namespace SnakeGameLibrary
         {
             await Task.Factory.StartNew(() => Turn(direction));
         }
-        private bool TryChangeDirection(Direction direction)
+        protected virtual bool TryChangeDirection(Direction direction)
         {
             switch (direction)
             {

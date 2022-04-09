@@ -1,26 +1,31 @@
 ﻿using SnakeGameLibrary;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SnakeLulu
 {
-    class Model
+    public class Model
     {
         #region <-- Fields and properties
         Random random = new Random();
 
+        private bool isSoundOff;
+        public bool IsSoundOff { get => isSoundOff; set => isSoundOff = value; }
+
+        private int currentLevelNumber;
+        public int CurrentLevelNumber { get => currentLevelNumber; set => currentLevelNumber = value; }
+
         private LevelInfo levelInfo;
-        internal LevelInfo LevelInfo { get => levelInfo; set => levelInfo = value; }
+        public LevelInfo LevelInfo { get => levelInfo; set => levelInfo = value; }
 
         private List<GameEntityUnit<char>> walls;
         public List<GameEntityUnit<char>> Walls { get => walls; set => walls = value; }
 
         private List<GameEntityUnit<char>> gate;
         public List<GameEntityUnit<char>> Gate { get => gate; set => gate = value; }
-
-        private int levelScore;
-        public int LevelScore { get => levelScore; set => levelScore = value; }
 
         private SnakeForConsole2D player;
         public SnakeForConsole2D Player { get => player; set => player = value; }
@@ -39,6 +44,8 @@ namespace SnakeLulu
             this.gate = new List<GameEntityUnit<char>>();
             this.walls = new List<GameEntityUnit<char>>();
             this.apples = new List<GameEntityUnit<char>>();
+            this.player = new SnakeForConsole2D();
+            this.levelInfo = new LevelInfo();
         }
         static Model model;
         public static Model GetInstance()
@@ -148,7 +155,7 @@ namespace SnakeLulu
                     {
                         symbol = '#';
                     }
-                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos, symbol);
+                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos - i, symbol);
                 }
             }
             else if (levelInfo.DirectionStartBodyPlayer == Direction.Back)
@@ -168,7 +175,7 @@ namespace SnakeLulu
                     {
                         symbol = '#';
                     }
-                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos, symbol);
+                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos + i, symbol);
                 }
             }
             else if (levelInfo.DirectionStartBodyPlayer == Direction.Left)
@@ -188,7 +195,7 @@ namespace SnakeLulu
                     {
                         symbol = '#';
                     }
-                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos, symbol);
+                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos - i, levelInfo.CoordinateYStartPlayerPos, symbol);
                 }
             }
             else if (levelInfo.DirectionStartBodyPlayer == Direction.Right)
@@ -208,7 +215,7 @@ namespace SnakeLulu
                     {
                         symbol = '#';
                     }
-                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos, levelInfo.CoordinateYStartPlayerPos, symbol);
+                    temp[i] = new GameEntityUnit<char>(levelInfo.CoordinateXStartPlayerPos + i, levelInfo.CoordinateYStartPlayerPos, symbol);
                 }
             }
             player.Body = temp;
@@ -268,18 +275,23 @@ namespace SnakeLulu
             {
                 if (apples[i].X == x && apples[i].Y == y)
                 {
-                    levelInfo.Score += 10;
                     apples.RemoveAt(i);
                     BuildApples();
-                    player.ChangeLength(1);
                     result = true;
                 }
             }
             return result;
         }
         public bool CheckCoordinateApplesForPlayer()
-    => CheckCoordinateApples(player.Body[0].X, player.Body[0].Y);
-
+        {
+            if(CheckCoordinateApples(player.Body[0].X, player.Body[0].Y))
+            {
+                player.ChangeLength(1);
+                levelInfo.Score += 10;
+                return true;
+            }
+            return false;
+        }
         public bool CheckForChangesAfterAddingScore()
         {
             int valueIncreaseSpeed = levelInfo.Score / levelInfo.SpeedIncreaseFrequency;
@@ -287,7 +299,6 @@ namespace SnakeLulu
 
             if (levelInfo.Score == levelInfo.RequiredScore)
             {
-                BuildGate();
                 return true;
             }
             return false;
@@ -306,14 +317,14 @@ namespace SnakeLulu
             player.ChangePosition();
         }
 
-        public void NewLevelInfo(int levelNumber)
+        public void NewLevelInfo()
         {
             levelInfo = new LevelInfo();
-            switch(levelNumber)
+            switch(currentLevelNumber)
             {
                 case 1:
                     levelInfo.Score = 0;
-                    levelInfo.RequiredScore = 30;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    levelInfo.RequiredScore = 300;
                     levelInfo.MaxCountOfApples = 2;
                     levelInfo.LevelNumber = 1;
                     levelInfo.LevelTask = "Score 300 points to open next level.";
@@ -336,7 +347,7 @@ namespace SnakeLulu
                     break;
                 case 2:
                     levelInfo.Score = 0;
-                    levelInfo.RequiredScore = 30;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    levelInfo.RequiredScore = 270;
                     levelInfo.MaxCountOfApples = 2;
                     levelInfo.LevelNumber = 2;
                     levelInfo.LevelTask = "Score 270 points to open next level.";
@@ -365,10 +376,10 @@ namespace SnakeLulu
                     break;
                 case 3:
                     levelInfo.Score = 0;
-                    levelInfo.RequiredScore = 240;//TEST !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    levelInfo.RequiredScore = 270;
                     levelInfo.MaxCountOfApples = 2;
                     levelInfo.LevelNumber = 3;
-                    levelInfo.LevelTask = "Score 240 points to open next level.";
+                    levelInfo.LevelTask = "Score 270 points to open next level.";
 
                     levelInfo.CoordinateYForOutputLevelTask = 21;
                     levelInfo.CoordinateYForOutputScore = 22;
@@ -376,7 +387,7 @@ namespace SnakeLulu
                     levelInfo.MaxWidthGameField = 30;
 
                     levelInfo.SpeedIncreaseFrequency = 30;
-                    levelInfo.CoordinateXStartPlayerPos = 3;
+                    levelInfo.CoordinateXStartPlayerPos = 5;
                     levelInfo.CoordinateYStartPlayerPos = 4;
                     levelInfo.DirectionStartBodyPlayer = Direction.Left;
 
@@ -398,7 +409,124 @@ namespace SnakeLulu
                     };
                     levelInfo.Gate = new ParamForBuildWall(24, 20, 4, Direction.Right);
                     break;
+                case 4:
+                    levelInfo.Score = 0;
+                    levelInfo.RequiredScore = 360;
+                    levelInfo.MaxCountOfApples = 1;
+                    levelInfo.MaxCountOfSnakeBots = 0;
+                    levelInfo.CoordinateXStartSnakeBotPos = 10;
+                    levelInfo.CoordinateYStartSnakeBotPos = 5;
+                    levelInfo.LevelNumber = 4;
+                    levelInfo.LevelTask = "Score 360 points to open next level.";
+                    levelInfo.CoordinateYForOutputLevelTask = 21;
+                    levelInfo.CoordinateYForOutputScore = 22;
+                    levelInfo.MaxHeightGameField = 20;
+                    levelInfo.MaxWidthGameField = 30;
+                    levelInfo.SpeedIncreaseFrequency = 30;
+                    levelInfo.CoordinateXStartPlayerPos = 10;
+                    levelInfo.CoordinateYStartPlayerPos = 14;
+                    levelInfo.DirectionStartBodyPlayer = Direction.Back;
+                    levelInfo.ParamForBuildWalls = new ParamForBuildWall[]
+                    {
+                        new ParamForBuildWall(0, 0, 30, Direction.Right),
+                        new ParamForBuildWall(30, 0, 20, Direction.Back),
+                        new ParamForBuildWall(30, 20, 30, Direction.Left),
+                        new ParamForBuildWall(0, 20, 20, Direction.Forward),
+                        new ParamForBuildWall(16, 1, 3, Direction.Back),
+                        new ParamForBuildWall(16, 7, 4, Direction.Back),
+                        new ParamForBuildWall(16, 10, 14, Direction.Right),
+                        new ParamForBuildWall(8, 20, 15, Direction.Forward),
+                    };
+                    levelInfo.Gate = new ParamForBuildWall(30, 8, 4, Direction.Back);
+                    break;
             }
+        }
+        public void SerializeModel()
+        {
+            try
+            {
+                XmlSerializer serializer;
+                FileStream stream;
+                Directory.CreateDirectory("Save");
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                File.Delete("Save\\SerializationWalls.xml");
+                stream = new FileStream("Save\\SerializationWalls.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, walls);
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                File.Delete("Save\\SerializationApples.xml");
+                stream = new FileStream("Save\\SerializationApples.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, apples);
+
+                serializer = new XmlSerializer(typeof(SnakeForConsole2D));
+                File.Delete("Save\\SerializationPlayer.xml");
+                stream = new FileStream("Save\\SerializationPlayer.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, player);
+
+                serializer = new XmlSerializer(typeof(LevelInfo));
+                File.Delete("Save\\SerializationLevelInfo.xml");
+                stream = new FileStream("Save\\SerializationLevelInfo.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, levelInfo);
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                File.Delete("Save\\SerializationGate.xml");
+                stream = new FileStream("Save\\SerializationGate.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, gate);
+
+                serializer = new XmlSerializer(typeof(GameStatus));
+                File.Delete("Save\\SerializationGameStatus.xml");
+                stream = new FileStream("Save\\SerializationGameStatus.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, gameStatus);
+
+                serializer = new XmlSerializer(typeof(int));
+                File.Delete("Save\\SerializationCurrentLevelNumber.xml");
+                stream = new FileStream("Save\\SerializationCurrentLevelNumber.xml", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+                serializer.Serialize(stream, currentLevelNumber);
+
+                stream.Close();
+            }
+            catch { }
+            
+        }
+        public void DeserializeModel()
+        {
+            try
+            {
+                XmlSerializer serializer;
+                FileStream stream;
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                stream = new FileStream("Save\\SerializationWalls.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                walls = serializer.Deserialize(stream) as List<GameEntityUnit<char>>;
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                stream = new FileStream("Save\\SerializationApples.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                apples = serializer.Deserialize(stream) as List<GameEntityUnit<char>>;
+
+                serializer = new XmlSerializer(typeof(SnakeForConsole2D));
+                stream = new FileStream("Save\\SerializationPlayer.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                player = serializer.Deserialize(stream) as SnakeForConsole2D;
+
+                serializer = new XmlSerializer(typeof(LevelInfo));
+                stream = new FileStream("Save\\SerializationLevelInfo.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                levelInfo = (LevelInfo)serializer.Deserialize(stream);
+
+                serializer = new XmlSerializer(typeof(List<GameEntityUnit<char>>));
+                stream = new FileStream("Save\\SerializationGate.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                gate = serializer.Deserialize(stream) as List<GameEntityUnit<char>>;
+
+                serializer = new XmlSerializer(typeof(GameStatus));
+                stream = new FileStream("Save\\SerializationGameStatus.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                gameStatus = (GameStatus)serializer.Deserialize(stream);
+
+                serializer = new XmlSerializer(typeof(int));
+                stream = new FileStream("Save\\SerializationCurrentLevelNumber.xml", FileMode.Open, FileAccess.Read, FileShare.Read);
+                currentLevelNumber = (int)serializer.Deserialize(stream);
+
+                stream.Close();
+            }
+            catch { }
         }
     }
 }

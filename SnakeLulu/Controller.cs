@@ -1,8 +1,11 @@
 ﻿using SnakeGameLibrary;
 using System;
+using System.IO;
+using System.Media;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SnakeLulu
 {
@@ -10,9 +13,9 @@ namespace SnakeLulu
     {
         private static Model model;
         private static View view;
-        private static int currentLevelNumber;
         private static CancellationTokenSource cancellation;
         private static Task ShowCountdownBeforeTask;
+        private static SoundPlayer soundPlayer;
 
         static void Main(string[] args)
         {
@@ -63,6 +66,11 @@ namespace SnakeLulu
 
         static void OpenMenu()
         {
+            soundPlayer = new SoundPlayer(@"Resources\Beep-melody.wav");
+            if (!model.IsSoundOff)
+            {
+                soundPlayer.PlayLooping();
+            }
             bool isSelected = false;
             int index = 0;
             if (model.GameStatus == GameStatus.NewGame)
@@ -110,20 +118,30 @@ namespace SnakeLulu
                     case ConsoleKey.Enter:
                         isSelected = true;
                         break;
+                    case ConsoleKey.Tab:
+                        model.IsSoundOff = model.IsSoundOff ? false : true;
+                        if (model.IsSoundOff) soundPlayer.Stop();
+                        else soundPlayer.PlayLooping();
+                        break;
                 }
             }
 
+            soundPlayer.Stop();
             Console.Clear();
+
             switch (index)
             {
                 case 0:
-                    currentLevelNumber = 1;
+                    model.CurrentLevelNumber = 1;
                     CreateNewGameLevel();
                     PlayGameAsync();
                     ControlGame();
                     break;
                 case 1:
-                    //TODO
+                    model.DeserializeModel();
+                    model.GameStatus = GameStatus.FlowGame;
+                    PlayGameAsync();
+                    ControlGame();
                     break;
                 case 2:
                     Environment.Exit(0);
@@ -134,21 +152,22 @@ namespace SnakeLulu
                     ControlGame();
                     break;
                 case 4:
-                    //TODO
+                    model.SerializeModel();
+                    OpenMenu();
                     break;
             }
         }
         static void CreateNewGameLevel()
         {
-            model.NewLevelInfo(currentLevelNumber);
+            model.NewLevelInfo();
             model.ClearModel();
 
             model.BuildWalls();
+            model.BuildGate();
 
             model.BuildPlayer();
             
             model.BuildApples();
-
             model.GameStatus = GameStatus.FlowGame;
         }
         static async void PlayGameAsync()
@@ -158,6 +177,7 @@ namespace SnakeLulu
         static void PlayGame()
         {
             Console.Clear();
+            soundPlayer = new SoundPlayer(@"Resources\Death-melody.wav");
             view.DrawWalls();
             view.DrawPlayer();
             view.DrawApples();
@@ -177,7 +197,6 @@ namespace SnakeLulu
             {
                 model.MovePlayer();
                 view.DrawPlayer();
-
                 if (model.CheckCoordinateApplesForPlayer())
                 {
                     if(model.CheckForChangesAfterAddingScore())
@@ -191,14 +210,14 @@ namespace SnakeLulu
                     }
                     view.ShowLevelScore();
                 }
-                
+
                 if (model.CheckCoordinateWallsForPlayer())
                 {
                     model.GameStatus = GameStatus.OverGame;
                 }
-                if (model.CheckCoordinateGateForPlayer())
+                if (model.CheckCoordinateGateForPlayer() && model.LevelInfo.Score == model.LevelInfo.RequiredScore)
                 {
-                    currentLevelNumber++;
+                    model.CurrentLevelNumber++;
                     //TODO smooth transition
                     model.GameStatus = GameStatus.NextLevel;
                 }
@@ -248,16 +267,41 @@ namespace SnakeLulu
             }
             if (model.GameStatus == GameStatus.OverGame)
             {
+                if (!model.IsSoundOff)
+                {
+                    soundPlayer.Play();
+                }
                 view.ShowEndGame();
                 Console.ReadKey();
+                soundPlayer.Stop();
                 model.GameStatus = GameStatus.NewGame;
                 OpenMenu();
             }
             if (model.GameStatus == GameStatus.NextLevel)
             {
-                CreateNewGameLevel();
-                PlayGameAsync();
-                ControlGame();
+                if (model.CurrentLevelNumber == 5)
+                {
+                    cancellation = new CancellationTokenSource();
+                    CancellationToken cancellationToken = cancellation.Token;
+                    Task task = new Task(view.ShowGameСompletion, cancellationToken);
+                    task.Start();
+                    Console.ReadKey();
+                    try
+                    {
+                        if (!task.IsCompleted)
+                            cancellation.Cancel();
+                        task.Wait();
+                    }
+                    catch { }
+                    model.GameStatus = GameStatus.NewGame;
+                    OpenMenu();
+                }
+                else
+                {
+                    CreateNewGameLevel();
+                    PlayGameAsync();
+                    ControlGame();
+                }
             }
         }
     }
