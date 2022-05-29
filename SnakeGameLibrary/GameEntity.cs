@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
-namespace SnakeGameLibrary
+﻿namespace SnakeGameLibrary
 {
     public abstract class GameEntity<T>
     {

@@ -1,9 +1,5 @@
 ﻿using SnakeGameLibrary;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Media;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,6 +27,7 @@ namespace SnakeLulu
         }
         #endregion
 
+        #region Show methods
         public void ShowLevelInfo()
         {
             Console.SetCursorPosition(0, model.LevelInfo.CoordinateYForOutputLevelTask);
@@ -45,65 +42,6 @@ namespace SnakeLulu
             Console.WriteLine($"Score: {model.LevelInfo.Score} ");
             Console.ResetColor();
         }
-        public void DrawWalls()
-        {
-            Console.BackgroundColor = ConsoleColor.White;
-            foreach (var el in model.Walls)
-            {
-                Console.SetCursorPosition(el.X, el.Y);
-                Console.Write(' ');
-            }
-            Console.BackgroundColor = ConsoleColor.Black;
-        }
-        public void DrawGate()
-        {
-            Console.BackgroundColor = ConsoleColor.DarkGreen;
-            Console.ForegroundColor = ConsoleColor.Green;
-            foreach (var el in model.Gate)
-            {
-                Console.SetCursorPosition(el.X, el.Y);
-                Console.Write(el.Material);
-            }
-            Console.ResetColor();
-        }
-        public void DrawPlayer()
-        {
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            for (int i = model.Player.Body.Length - 1; i >= 0; i--)
-            {
-                Console.SetCursorPosition(model.Player.Body[i].X, model.Player.Body[i].Y);
-                Console.Write(model.Player.Body[i].Material);
-            }
-            if (!model.IsSoundOff)
-            {
-                soundTask = new Task(() => Console.Beep(500, 30));
-                soundTask.Start();
-            }
-        }
-        public void DrawApples()
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            for (int i = 0; i < model.Apples.Count; i++)
-            {
-                Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
-                Console.Write(model.Apples[i].Material);
-            }
-            if (!model.IsSoundOff)
-            {
-                soundTask = new Task(() => Console.Beep(500, 150));
-                soundTask.Start();
-            }
-        }
-        public void PutAwayApples()
-        {
-            for (int i = 0; i < model.Apples.Count; i++)
-            {
-                Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
-                Console.Write(' ');
-            }
-            model.Apples.Clear();
-        }
-
         public void ShowGameIntro(object arg)
         {
             CancellationToken cancellationToken = (CancellationToken)arg;
@@ -315,5 +253,69 @@ namespace SnakeLulu
                 Console.Write("    ");
             }
         }
+        #endregion
+
+        #region Draw methods
+        public void DrawWalls()
+        {
+            Console.BackgroundColor = ConsoleColor.White;
+            foreach (var el in model.Walls)
+            {
+                Console.SetCursorPosition(el.X, el.Y);
+                Console.Write(' ');
+            }
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+        public void DrawGate()
+        {
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.ForegroundColor = ConsoleColor.Green;
+            foreach (var el in model.Gate)
+            {
+                Console.SetCursorPosition(el.X, el.Y);
+                Console.Write(el.Material);
+            }
+            Console.ResetColor();
+        }
+        public void DrawPlayer()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            for (int i = model.Player.Body.Length - 1; i >= 0; i--)
+            {
+                Console.SetCursorPosition(model.Player.Body[i].X, model.Player.Body[i].Y);
+                Console.Write(model.Player.Body[i].Material);
+            }
+            if (!model.IsSoundOff)
+            {
+                soundTask = new Task(() => Console.Beep(500, 30));
+                soundTask.Start();
+            }
+        }
+        public void DrawApples()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            for (int i = 0; i < model.Apples.Count; i++)
+            {
+                Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
+                Console.Write(model.Apples[i].Material);
+            }
+            if (!model.IsSoundOff)
+            {
+                soundTask = new Task(() => Console.Beep(500, 150));
+                soundTask.Start();
+            }
+        }
+        #endregion
+        public void PutAwayApples()
+        {
+            for (int i = 0; i < model.Apples.Count; i++)
+            {
+                Console.SetCursorPosition(model.Apples[i].X, model.Apples[i].Y);
+                Console.Write(' ');
+            }
+            model.Apples.Clear();
+        }
+
+
     }
 }

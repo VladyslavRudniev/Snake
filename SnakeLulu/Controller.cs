@@ -1,11 +1,9 @@
 ﻿using SnakeGameLibrary;
 using System;
-using System.IO;
 using System.Media;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace SnakeLulu
 {

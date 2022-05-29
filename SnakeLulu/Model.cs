@@ -64,6 +64,8 @@ namespace SnakeLulu
             this.walls = new List<GameEntityUnit<char>>();
             this.apples = new List<GameEntityUnit<char>>();
         }
+
+        #region Build methods
         public void BuildWall(int x, int y, int length, Direction direction)
         {
             switch (direction)
@@ -233,7 +235,9 @@ namespace SnakeLulu
                 }
             }
         }
+        #endregion
 
+        #region Checking methods
         private bool CheckCoordinatePlayer(int x, int y, int startIndex)
         {
             bool result = false;
@@ -311,6 +315,7 @@ namespace SnakeLulu
             }
             return false;
         }
+        #endregion
 
         public void MovePlayer()
         {
@@ -441,6 +446,8 @@ namespace SnakeLulu
                     break;
             }
         }
+
+        #region Save and load game methods
         public void SerializeModel()
         {
             try
@@ -528,5 +535,6 @@ namespace SnakeLulu
             }
             catch { }
         }
+        #endregion
     }
 }
