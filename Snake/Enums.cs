@@ -1,5 +1,8 @@
 ﻿namespace SnakeLulu
 {
+    /// <summary>
+    /// Menu items enum
+    /// </summary>
     public enum MenuItems : int
     {
         StartGame = 0,

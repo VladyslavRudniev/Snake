@@ -1,22 +1,45 @@
 ﻿namespace SnakeGameLibrary
 {
+    /// <summary>
+    /// Snake essence abstraction
+    /// </summary>
+    /// <typeparam name="T">Snake body unit type</typeparam>
     public abstract class GameEntity<T>
     {
-        private GameEntityUnit<T>[] body;
+        protected GameEntityUnit<T>[] body;
+        /// <summary>
+        /// Array of snake body units
+        /// </summary>
         public GameEntityUnit<T>[] Body { get => body; set => body = value; }
 
-        private int id;
+        protected int id;
+        /// <summary>
+        /// Unique identifier for the snake
+        /// </summary>
         public int Id { get => id; set => id = value; }
 
-        private EntityState state;
+        protected EntityState state;
+        /// <summary>
+        /// Snake state
+        /// </summary>
         public EntityState State { get => state; set => state = value; }
 
-        private Direction direction;
+        protected Direction direction;
+        /// <summary>
+        /// Snake direction
+        /// </summary>
         public Direction Direction { get => direction; set => direction = value; }
 
-        private int speed;
+        protected int speed;
+        /// <summary>
+        /// Snake movement speed
+        /// </summary>
         public int Speed { get => speed; set => speed = value; }
-
+        /// <summary>
+        /// Get and set methods for accessing the snake body unit by index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public GameEntityUnit<T> this[int index]
         {
             get => body[index];
@@ -38,14 +61,34 @@
             this.speed = speed;
             this.direction = direction;
         }
-
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>Unique identifier of snake</returns>
         public override int GetHashCode() => this.id;
         public override string ToString()
             => $"{this.GetType().Name}: id=[{this.id}] direction=[{this.direction}] state=[{this.state}] speed=[{this.speed}]";
 
+        /// <summary>
+        /// Changes the position of the snake
+        /// </summary>
         public abstract void ChangePosition();
+        /// <summary>
+        /// Changes the direction of the snake
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>Has the direction been changed</returns>
         public abstract bool Turn(Direction direction);
+        /// <summary>
+        /// Changes the length of the snake
+        /// </summary>
+        /// <param name="value">Growth size</param>
         public abstract void ChangeLength(int value);
+        /// <summary>
+        /// Changes the speed of movement the snake
+        /// </summary>
+        /// <param name="value"></param>
         public abstract void ChangeSpeed(int value);
 
     }

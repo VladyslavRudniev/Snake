@@ -2,10 +2,14 @@
 
 namespace SnakeGameLibrary
 {
+    /// <summary>
+    /// Class Snake for console game
+    /// </summary>
     public class SnakeForConsole2D : GameEntity<char>, ISnakeForConsole2D
     {
         public SnakeForConsole2D() : base() { }
         public SnakeForConsole2D(int id, GameEntityUnit<char>[] entityUnits, EntityState state, int speed, Direction direction) : base(id, entityUnits, state, speed, direction) { }
+        
         public override void ChangeLength(int value)
         {
             Body[Body.Length - 1].Material = Body[Body.Length - 2].Material;
@@ -14,6 +18,10 @@ namespace SnakeGameLibrary
             Body = temp;
             Body[Body.Length - 1].Material = ' ';
         }
+        /// <summary>
+        /// Changes the length of the snake
+        /// </summary>
+        /// <param name="value">Growth size</param>
         public virtual async void ChangeLengthAsync(int value)
         {
             await Task.Factory.StartNew(() => ChangeLength(value));
@@ -46,17 +54,26 @@ namespace SnakeGameLibrary
                     break;
             }
         }
+        /// <summary>
+        /// Changes the position of the snake
+        /// </summary>
         public virtual async void ChangePositionAsync()
         {
             await Task.Factory.StartNew(ChangePosition);
         }
 
-        public override void ChangeSpeed(int value) => this.Speed += value;
+        public override void ChangeSpeed(int value) 
+            => this.Speed += value;
 
         public override bool Turn(Direction direction)
         {
             return TryChangeDirection(direction);
         }
+        /// <summary>
+        /// Changes the direction of the snake
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns>Has the direction been changed</returns>
         public virtual async void TurnAsync(Direction direction)
         {
             await Task.Factory.StartNew(() => Turn(direction));

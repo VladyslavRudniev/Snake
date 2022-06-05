@@ -1,5 +1,8 @@
 ﻿namespace SnakeGameLibrary
 {
+    /// <summary>
+    /// Entity state enum
+    /// </summary>
     public enum EntityState : byte
     {
         Move = 1,
@@ -10,6 +13,9 @@
         Die = 5,
         Alarmed = 6,
     }
+    /// <summary>
+    /// Player direction enum
+    /// </summary>
     public enum Direction : byte
     {
         Forward = 0,
@@ -19,6 +25,9 @@
         Up = 4,
         Down = 5,
     }
+    /// <summary>
+    /// Game status enum
+    /// </summary>
     public enum GameStatus : byte
     {
         NewGame = 0,
