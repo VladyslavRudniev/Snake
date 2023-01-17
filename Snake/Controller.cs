@@ -19,6 +19,7 @@ namespace SnakeLulu
         {
             model = Model.GetInstance();
             view = View.GetInstance(model);
+            soundPlayer = new();
             model.GameStatus = GameStatus.NewGame;
 
             SetOptions();
@@ -64,10 +65,10 @@ namespace SnakeLulu
 
         static void OpenMenu()
         {
-            soundPlayer = new SoundPlayer(@"Resources\Beep-melody.wav");
+            soundPlayer.Stream = Snake.Properties.Resources.Beep_melody;
             if (!model.IsSoundOff)
             {
-                soundPlayer.PlayLooping();
+                soundPlayer.Play();
             }
             bool isSelected = false;
             int index = 0;
@@ -119,7 +120,7 @@ namespace SnakeLulu
                     case ConsoleKey.Tab:
                         model.IsSoundOff = model.IsSoundOff ? false : true;
                         if (model.IsSoundOff) soundPlayer.Stop();
-                        else soundPlayer.PlayLooping();
+                        else soundPlayer.Play();
                         break;
                 }
             }
@@ -175,7 +176,7 @@ namespace SnakeLulu
         static void PlayGame()
         {
             Console.Clear();
-            soundPlayer = new SoundPlayer(@"Resources\Death-melody.wav");
+            soundPlayer.Stream = Snake.Properties.Resources.Death_melody;
             view.DrawWalls();
             view.DrawPlayer();
             view.DrawApples();
